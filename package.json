@@ -81,6 +81,7 @@
     "start-server-and-test": "^1.12.0"
   },
   "scripts": {
+	"start": "electron-forge start",
     "electron:start": "electron-forge start",
     "electron:debug-start": "electron-forge start --inspect-electron",
     "electron:package": "electron-forge package",

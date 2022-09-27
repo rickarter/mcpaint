@@ -44,11 +44,11 @@ function get_url_param(param_name) {
 	return get_all_url_params()[param_name];
 }
 
-function change_url_param(param_name, value, { replace_history_state = false } = {}) {
-	change_some_url_params({ [param_name]: value }, { replace_history_state });
+function change_url_param(param_name, value, {replace_history_state = false} = {}) {
+	change_some_url_params({[param_name]: value}, {replace_history_state});
 }
 
-function change_some_url_params(updates, { replace_history_state = false } = {}) {
+function change_some_url_params(updates, {replace_history_state = false} = {}) {
 	for (const exclusive_param of exclusive_params) {
 		if (updates[exclusive_param]) {
 			exclusive_params.forEach((param) => {
@@ -58,10 +58,10 @@ function change_some_url_params(updates, { replace_history_state = false } = {})
 			});
 		}
 	}
-	set_all_url_params(Object.assign({}, get_all_url_params(), updates), { replace_history_state });
+	set_all_url_params(Object.assign({}, get_all_url_params(), updates), {replace_history_state});
 }
 
-function set_all_url_params(params, { replace_history_state = false } = {}) {
+function set_all_url_params(params, {replace_history_state = false} = {}) {
 
 	let new_hash = "";
 	for (const [param_name, param_type] of Object.entries(param_types)) {
@@ -96,6 +96,7 @@ function set_all_url_params(params, { replace_history_state = false } = {}) {
 function update_magnified_canvas_size() {
 	$canvas.css("width", main_canvas.width * magnification);
 	$canvas.css("height", main_canvas.height * magnification);
+	window.api.resize(main_canvas.width, main_canvas.height);
 
 	update_canvas_rect();
 }
@@ -114,7 +115,7 @@ function update_helper_layer(e) {
 	// e may be a synthetic event without clientX/Y, so ignore that (using isFinite)
 	// e may also be a timestamp from requestAnimationFrame callback; ignore that
 	if (e && isFinite(e.clientX)) {
-		info_for_updating_pointer = { clientX: e.clientX, clientY: e.clientY, devicePixelRatio };
+		info_for_updating_pointer = {clientX: e.clientX, clientY: e.clientY, devicePixelRatio};
 	}
 	if (helper_layer_update_queued) {
 		// window.console && console.log("update_helper_layer - nah, already queued");
@@ -360,7 +361,7 @@ let dev_custom_zoom = false;
 try {
 	dev_custom_zoom = localStorage.dev_custom_zoom === "true";
 	// eslint-disable-next-line no-empty
-} catch (error) { }
+} catch (error) {}
 if (dev_custom_zoom) {
 	$(() => {
 		show_custom_zoom_window();
@@ -415,7 +416,7 @@ function show_custom_zoom_window() {
 		$really_custom_radio_option.prop("checked", true);
 	}
 
-	$fieldset.find("label").css({ display: "block" });
+	$fieldset.find("label").css({display: "block"});
 
 	$w.$Button(localize("OK"), () => {
 		let option_val = $fieldset.find("input[name='custom-zoom-radio']:checked").val();
@@ -478,8 +479,8 @@ function toggle_thumbnail() {
 			$thumbnail_window.addClass("thumbnail-window");
 			$thumbnail_window.$content.append(thumbnail_canvas);
 			$thumbnail_window.$content.addClass("inset-deep");
-			$thumbnail_window.$content.css({ marginTop: "1px" }); // @TODO: should this (or equivalent on titlebar) be for all windows?
-			$thumbnail_window.maximize = () => { }; // @TODO: disable maximize with an option
+			$thumbnail_window.$content.css({marginTop: "1px"}); // @TODO: should this (or equivalent on titlebar) be for all windows?
+			$thumbnail_window.maximize = () => {}; // @TODO: disable maximize with an option
 			new ResizeObserver((entries) => {
 				const entry = entries[0];
 				let width, height;
@@ -506,7 +507,7 @@ function toggle_thumbnail() {
 					thumbnail_canvas.height = height;
 				}
 				update_helper_layer_immediately(); // updates thumbnail (but also unnecessarily the helper layer)
-			}).observe(thumbnail_canvas, { box: ['device-pixel-content-box'] });
+			}).observe(thumbnail_canvas, {box: ['device-pixel-content-box']});
 		}
 		$thumbnail_window.show();
 		$thumbnail_window.on("close", (e) => {
@@ -634,7 +635,7 @@ function get_uris(text) {
 			const url = new URL(lines[i]);
 			uris.push(url.href);
 			// eslint-disable-next-line no-empty
-		} catch (e) { }
+		} catch (e) {}
 	}
 	return uris;
 }
@@ -701,7 +702,7 @@ async function load_image_from_uri(uri) {
 				$status_text.text("Downloading picture...");
 			}
 
-			const show_progress = ({ loaded, total }) => {
+			const show_progress = ({loaded, total}) => {
 				if (is_download) {
 					$status_text.text(`Downloading picture... (${Math.round(loaded / total * 100)}%)`);
 				}
@@ -714,7 +715,7 @@ async function load_image_from_uri(uri) {
 			const original_response = await fetch(uri_to_try);
 			let response_to_read = original_response;
 			if (!original_response.ok) {
-				fails.push({ status: original_response.status, statusText: original_response.statusText, url: uri_to_try });
+				fails.push({status: original_response.status, statusText: original_response.statusText, url: uri_to_try});
 				continue;
 			}
 			if (!original_response.body) {
@@ -740,13 +741,13 @@ async function load_image_from_uri(uri) {
 
 								read();
 								function read() {
-									reader.read().then(({ done, value }) => {
+									reader.read().then(({done, value}) => {
 										if (done) {
 											controller.close();
 											return;
 										}
 										loaded += value.byteLength;
-										show_progress({ loaded, total })
+										show_progress({loaded, total})
 										controller.enqueue(value);
 										read();
 									}).catch(error => {
@@ -781,7 +782,7 @@ async function load_image_from_uri(uri) {
 			});
 			return info;
 		} catch (error) {
-			fails.push({ url: uri_to_try, error });
+			fails.push({url: uri_to_try, error});
 		}
 	}
 	if (is_download) {
@@ -796,7 +797,7 @@ async function load_image_from_uri(uri) {
 }
 
 function open_from_image_info(info, callback, canceled, into_existing_session, from_session_load) {
-	are_you_sure(({ canvas_modified_while_loading } = {}) => {
+	are_you_sure(({canvas_modified_while_loading} = {}) => {
 		deselect();
 		cancel();
 
@@ -865,7 +866,7 @@ function open_from_file(file, source_file_handle) {
 		if (as_image_error) {
 			AnyPalette.loadPalette(file, (as_palette_error, new_palette) => {
 				if (as_palette_error) {
-					show_file_format_errors({ as_image_error, as_palette_error });
+					show_file_format_errors({as_image_error, as_palette_error});
 					return;
 				}
 				palette = new_palette.map((color) => color.toString());
@@ -907,7 +908,7 @@ function load_theme_from_text(fileText) {
 		show_error_message(localize("Paint cannot open this file."));
 		return;
 	}
-	applyCSSProperties(cssProperties, { recurseIntoIframes: true });
+	applyCSSProperties(cssProperties, {recurseIntoIframes: true});
 
 	window.themeCSSProperties = cssProperties;
 
@@ -932,7 +933,7 @@ function file_new() {
 }
 
 async function file_open() {
-	const { file, fileHandle } = await systemHooks.showOpenFileDialog({ formats: image_formats })
+	const {file, fileHandle} = await systemHooks.showOpenFileDialog({formats: image_formats})
 	open_from_file(file, fileHandle);
 }
 
@@ -989,7 +990,7 @@ async function confirm_overwrite_capability() {
 	if (acknowledged_overwrite_capability) {
 		return true;
 	}
-	const { $window, promise } = showMessageBox({
+	const {$window, promise} = showMessageBox({
 		messageHTML: `
 			<p>JS Paint can now save over existing files.</p>
 			<p>Do you want to overwrite the file?</p>
@@ -999,8 +1000,8 @@ async function confirm_overwrite_capability() {
 			</p>
 		`,
 		buttons: [
-			{ label: localize("Yes"), value: "overwrite", default: true },
-			{ label: localize("Cancel"), value: "cancel" },
+			{label: localize("Yes"), value: "overwrite", default: true},
+			{label: localize("Cancel"), value: "cancel"},
 		],
 	});
 	const result = await promise;
@@ -1017,7 +1018,7 @@ async function confirm_overwrite_capability() {
 }
 
 
-function file_save(maybe_saved_callback = () => { }, update_from_saved = true) {
+function file_save(maybe_saved_callback = () => {}, update_from_saved = true) {
 	deselect();
 	// store and use file handle at this point in time, to avoid race conditions
 	const save_file_handle = system_file_handle;
@@ -1034,7 +1035,7 @@ function file_save(maybe_saved_callback = () => { }, update_from_saved = true) {
 	});
 }
 
-function file_save_as(maybe_saved_callback = () => { }, update_from_saved = true) {
+function file_save_as(maybe_saved_callback = () => {}, update_from_saved = true) {
 	deselect();
 	systemHooks.showSaveFileDialog({
 		dialogTitle: localize("Save As"),
@@ -1049,7 +1050,7 @@ function file_save_as(maybe_saved_callback = () => { }, update_from_saved = true
 				});
 			});
 		},
-		savedCallbackUnreliable: ({ newFileName, newFileFormatID, newFileHandle, newBlob }) => {
+		savedCallbackUnreliable: ({newFileName, newFileFormatID, newFileHandle, newBlob}) => {
 			saved = true;
 			system_file_handle = newFileHandle;
 			file_name = newFileName;
@@ -1090,7 +1091,7 @@ function are_you_sure(action, canceled, from_session_load) {
 					action();
 				}, false);
 			} else if (result === "discard") {
-				action({ canvas_modified_while_loading: true });
+				action({canvas_modified_while_loading: true});
 			} else {
 				// should not ideally happen
 				// but prefer to preserve the previous document,
@@ -1149,7 +1150,7 @@ function show_error_message(message, error) {
 	// It should fall back to an alert.
 	// EMIT stands for "Error Message Itself Test".
 
-	const { $message } = showMessageBox({
+	const {$message} = showMessageBox({
 		iconID: "error",
 		message,
 		// windowOptions: {
@@ -1198,7 +1199,7 @@ function show_error_message(message, error) {
 // @TODO: close are_you_sure windows and these Error windows when switching sessions
 // because it can get pretty confusing
 function show_resource_load_error_message(error) {
-	const { $window, $message } = showMessageBox({});
+	const {$window, $message} = showMessageBox({});
 	const firefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
 	// @TODO: copy & paste vs download & open, more specific guidance
 	if (error.code === "cross-origin-blob-uri") {
@@ -1226,7 +1227,7 @@ function show_resource_load_error_message(error) {
 				<p>Try copying and pasting an image instead of a URL.</p>
 			`);
 			if (error.fails) {
-				$("<ul>").append(error.fails.map(({ status, statusText, url }) =>
+				$("<ul>").append(error.fails.map(({status, statusText, url}) =>
 					$("<li>").text(url).prepend($("<b>").text(`${status || ""} ${statusText || "Failed"} `))
 				)).appendTo($message);
 			}
@@ -1243,10 +1244,10 @@ function show_resource_load_error_message(error) {
 			<p>Check your browser's devtools for details.</p>
 		`);
 	}
-	$message.css({ maxWidth: "500px" });
+	$message.css({maxWidth: "500px"});
 	$window.center(); // after adding content
 }
-function show_file_format_errors({ as_image_error, as_palette_error }) {
+function show_file_format_errors({as_image_error, as_palette_error}) {
 	let html = `
 		<p>${localize("Paint cannot open this file.")}</p>
 	`;
@@ -1314,7 +1315,7 @@ let $latest_news = $this_version_news;
 if (location.origin !== "https://jspaint.app") {
 	$this_version_news.prepend(
 		$("<p>For the latest news, visit <a href='https://jspaint.app'>jspaint.app</a></p>")
-			.css({ padding: "8px 15px" })
+			.css({padding: "8px 15px"})
 	);
 }
 
@@ -1333,7 +1334,7 @@ function show_about_paint() {
 		$("#paint-32x32").attr("src", "./images/icons/gay-es-paint-32x32-light-outline.png");
 	}
 
-	$about_paint_window.$content.append($about_paint_content.show()).css({ padding: "15px" });
+	$about_paint_window.$content.append($about_paint_content.show()).css({padding: "15px"});
 
 	$("#maybe-outdated-view-project-news").removeAttr("hidden");
 
@@ -1514,7 +1515,7 @@ function show_news() {
 function paste_image_from_file(blob) {
 	read_image_file(blob, (error, info) => {
 		if (error) {
-			show_file_format_errors({ as_image_error: error });
+			show_file_format_errors({as_image_error: error});
 			return;
 		}
 		paste(info.image || make_canvas(info.image_data));
@@ -1523,7 +1524,7 @@ function paste_image_from_file(blob) {
 
 // Edit > Paste From
 async function choose_file_to_paste() {
-	const { file } = await systemHooks.showOpenFileDialog({ formats: image_formats });
+	const {file} = await systemHooks.showOpenFileDialog({formats: image_formats});
 	if (file.type.match(/^image|application\/pdf/)) {
 		paste_image_from_file(file);
 		return;
@@ -1619,7 +1620,7 @@ function render_history_as_gif() {
 		display: "inline-block",
 		textAlign: "center",
 	});
-	$win.$main.css({ padding: 5 });
+	$win.$main.css({padding: 5});
 
 	const $cancel = $win.$Button('Cancel', () => {
 		$win.close();
@@ -1707,7 +1708,7 @@ function render_history_as_gif() {
 				const selection_canvas = make_canvas(frame_history_node.selection_image_data);
 				gif_canvas.ctx.drawImage(selection_canvas, frame_history_node.selection_x, frame_history_node.selection_y);
 			}
-			gif.addFrame(gif_canvas, { delay: 200, copy: true });
+			gif.addFrame(gif_canvas, {delay: 200, copy: true});
 		}
 		gif.render();
 
@@ -1827,7 +1828,7 @@ function go_to_history_node(target_history_node, canceling, discard_document_sta
 }
 
 // Note: This function is part of the API.
-function undoable({ name, icon, use_loose_canvas_changes, soft }, callback) {
+function undoable({name, icon, use_loose_canvas_changes, soft}, callback) {
 	if (!use_loose_canvas_changes) {
 		/* For performance (especially with two finger panning), I'm disabling this safety check that preserves certain document states in the history.
 		const current_image_data = main_ctx.getImageData(0, 0, main_canvas.width, main_canvas.height);
@@ -1896,7 +1897,7 @@ function make_or_update_undoable(undoable_meta, undoable_action) {
 	}
 }
 function undo() {
-	if (undos.length < 1) { return false; }
+	if (undos.length < 1) {return false;}
 
 	redos.push(current_history_node);
 	let target_history_node = undos.pop();
@@ -2155,7 +2156,7 @@ function meld_selection_into_canvas(going_to_history_node) {
 			name: "Deselect",
 			icon: get_icon_for_tool(get_tool_by_id(TOOL_SELECT)),
 			use_loose_canvas_changes: true, // HACK; @TODO: make OnCanvasSelection not change the canvas outside undoable, same rules as tools
-		}, () => { });
+		}, () => {});
 	}
 }
 function meld_textbox_into_canvas(going_to_history_node) {
@@ -2165,7 +2166,7 @@ function meld_textbox_into_canvas(going_to_history_node) {
 			name: localize("Text"),
 			icon: get_icon_for_tool(get_tool_by_id(TOOL_TEXT)),
 			soft: true,
-		}, () => { });
+		}, () => {});
 		undoable({
 			name: "Finish Text",
 			icon: get_icon_for_tool(get_tool_by_id(TOOL_TEXT)),
@@ -2389,7 +2390,7 @@ function clear() {
 	});
 }
 
-let cleanup_bitmap_view = () => { };
+let cleanup_bitmap_view = () => {};
 function view_bitmap() {
 	cleanup_bitmap_view();
 
@@ -2408,8 +2409,8 @@ function view_bitmap() {
 		zIndex: "9999",
 		background: "var(--Background)",
 	});
-	if (bitmap_view_div.requestFullscreen) { bitmap_view_div.requestFullscreen(); }
-	else if (bitmap_view_div.webkitRequestFullscreen) { bitmap_view_div.webkitRequestFullscreen(); }
+	if (bitmap_view_div.requestFullscreen) {bitmap_view_div.requestFullscreen();}
+	else if (bitmap_view_div.webkitRequestFullscreen) {bitmap_view_div.webkitRequestFullscreen();}
 
 	let blob_url;
 	let got_fullscreen = false;
@@ -2424,8 +2425,8 @@ function view_bitmap() {
 		}
 	}, 100);
 	cleanup_bitmap_view = () => {
-		document.removeEventListener("fullscreenchange", onFullscreenChange, { once: true });
-		document.removeEventListener("webkitfullscreenchange", onFullscreenChange, { once: true });
+		document.removeEventListener("fullscreenchange", onFullscreenChange, {once: true});
+		document.removeEventListener("webkitfullscreenchange", onFullscreenChange, {once: true});
 		document.removeEventListener("keydown", onKeyDown);
 		document.removeEventListener("mousedown", onMouseDown);
 		// If you have e.g. the Help window open,
@@ -2448,10 +2449,10 @@ function view_bitmap() {
 			}
 		}
 		bitmap_view_div.remove();
-		cleanup_bitmap_view = () => { };
+		cleanup_bitmap_view = () => {};
 	};
-	document.addEventListener("fullscreenchange", onFullscreenChange, { once: true });
-	document.addEventListener("webkitfullscreenchange", onFullscreenChange, { once: true });
+	document.addEventListener("fullscreenchange", onFullscreenChange, {once: true});
+	document.addEventListener("webkitfullscreenchange", onFullscreenChange, {once: true});
 	document.addEventListener("keydown", onKeyDown);
 	document.addEventListener("mousedown", onMouseDown);
 	document.addEventListener("contextmenu", onContextMenu);
@@ -2465,7 +2466,7 @@ function view_bitmap() {
 	function onKeyDown(event) {
 		// console.log(event.key, event.repeat);
 		repeating_f = repeating_f || event.repeat && (event.key === "f" || event.key === "F");
-		if (event.repeat) { return; }
+		if (event.repeat) {return;}
 		if (repeating_f && (event.key === "f" || event.key === "F")) {
 			repeating_f = false;
 			return; // Chrome sends an F keydown with repeat=false if you release Ctrl before F, while repeating.
@@ -2606,7 +2607,7 @@ function detect_monochrome(ctx) {
 					colorUint32s.push(pixelArray[i]);
 					colorRGBAs.push(id.data.slice(i * 4, (i + 1) * 4));
 				} else {
-					return { isMonochrome: false };
+					return {isMonochrome: false};
 				}
 			}
 		} else {
@@ -2623,7 +2624,7 @@ function detect_monochrome(ctx) {
 
 function make_monochrome_pattern(lightness, rgba1 = [0, 0, 0, 255], rgba2 = [255, 255, 255, 255]) {
 
-	const dither_threshold_table = Array.from({ length: 64 }, (_undefined, p) => {
+	const dither_threshold_table = Array.from({length: 64}, (_undefined, p) => {
 		const q = p ^ (p >> 3);
 		return (
 			((p & 4) >> 2) | ((q & 4) >> 1) |
@@ -2802,18 +2803,18 @@ function image_attributes() {
 
 	// Dimensions
 
-	const unit_sizes_in_px = { px: 1, in: 72, cm: 28.3465 };
+	const unit_sizes_in_px = {px: 1, in: 72, cm: 28.3465};
 	let current_unit = image_attributes.unit = image_attributes.unit || "px";
 	let width_in_px = main_canvas.width;
 	let height_in_px = main_canvas.height;
 
 	const $width_label = $(E("label")).appendTo($main).text(localize("Width:"));
 	const $height_label = $(E("label")).appendTo($main).text(localize("Height:"));
-	const $width = $(E("input")).attr({ type: "number", min: 1 }).addClass("no-spinner inset-deep").appendTo($width_label);
-	const $height = $(E("input")).attr({ type: "number", min: 1 }).addClass("no-spinner inset-deep").appendTo($height_label);
+	const $width = $(E("input")).attr({type: "number", min: 1}).addClass("no-spinner inset-deep").appendTo($width_label);
+	const $height = $(E("input")).attr({type: "number", min: 1}).addClass("no-spinner inset-deep").appendTo($height_label);
 
 	$main.find("input")
-		.css({ width: "40px" })
+		.css({width: "40px"})
 		.on("change keyup keydown keypress pointerdown pointermove paste drop", () => {
 			width_in_px = $width.val() * unit_sizes_in_px[current_unit];
 			height_in_px = $height.val() * unit_sizes_in_px[current_unit];
@@ -2829,7 +2830,7 @@ function image_attributes() {
 			<input type="radio" name="units" id="unit-px" value="px"><label for="unit-px">${localize("Pixels")}</label>
 		</div>
 	`);
-	$units.find(`[value=${current_unit}]`).attr({ checked: true });
+	$units.find(`[value=${current_unit}]`).attr({checked: true});
 	$units.on("change", () => {
 		const new_unit = $units.find(":checked").val();
 		$width.val(width_in_px / unit_sizes_in_px[new_unit]);
@@ -2844,7 +2845,7 @@ function image_attributes() {
 			<input type="radio" name="colors" id="attribute-polychrome" value="polychrome"><label for="attribute-polychrome">${localize("Colors")}</label>
 		</div>
 	`);
-	$colors.find(`[value=${monochrome ? "monochrome" : "polychrome"}]`).attr({ checked: true });
+	$colors.find(`[value=${monochrome ? "monochrome" : "polychrome"}]`).attr({checked: true});
 
 	const $transparency = $(E("fieldset")).appendTo($main).append(`
 		<legend>${localize("Transparency")}</legend>
@@ -2853,7 +2854,7 @@ function image_attributes() {
 			<input type="radio" name="transparency" id="attribute-opaque" value="opaque"><label for="attribute-opaque">${localize("Opaque")}</label>
 		</div>
 	`);
-	$transparency.find(`[value=${transparency ? "transparent" : "opaque"}]`).attr({ checked: true });
+	$transparency.find(`[value=${transparency ? "transparent" : "opaque"}]`).attr({checked: true});
 
 	// Buttons on the right
 
@@ -3051,10 +3052,10 @@ function image_flip_and_rotate() {
 			<label for="custom-degrees">${localize("Degrees")}</label>
 		</div>
 	`);
-	$rotate_by_angle.find("#rotate-90").attr({ checked: true });
+	$rotate_by_angle.find("#rotate-90").attr({checked: true});
 	// Disabling inputs makes them not even receive mouse events,
 	// and so pointer-events: none is needed to respond to events on the parent.
-	$rotate_by_angle.find("input").attr({ disabled: true });
+	$rotate_by_angle.find("input").attr({disabled: true});
 	$fieldset.find("input").on("change", () => {
 		const action = $fieldset.find("input[name='flip-or-rotate']:checked").val();
 		$rotate_by_angle.find("input").attr({
@@ -3338,7 +3339,7 @@ function save_as_prompt({
 		$w.center();
 		// For mobile devices with on-screen keyboards, move the window to the top
 		if (window.innerWidth < 500 || window.innerHeight < 700) {
-			$w.css({ top: 20 });
+			$w.css({top: 20});
 		}
 
 		if (promptForName) {
@@ -3426,7 +3427,7 @@ function read_image_file(blob, callback) {
 			}
 		}
 		if (detected_type_id === "bmp") {
-			const { colorTable, bitsPerPixel, imageData } = decodeBMP(arrayBuffer);
+			const {colorTable, bitsPerPixel, imageData} = decodeBMP(arrayBuffer);
 			file_format = bitsPerPixel === 24 ? "image/bmp" : `image/bmp;bpp=${bitsPerPixel}`;
 			if (colorTable.length >= 2) {
 				if (colorTable.length === 2) {
@@ -3442,11 +3443,11 @@ function read_image_file(blob, callback) {
 			// 		imageData.data[i] = 255;
 			// 	}
 			// }
-			callback(null, { file_format, monochrome, palette, image_data: imageData, source_blob: blob });
+			callback(null, {file_format, monochrome, palette, image_data: imageData, source_blob: blob});
 		} else if (detected_type_id === "png") {
 			const decoded = UPNG.decode(arrayBuffer);
 			const rgba = UPNG.toRGBA8(decoded)[0];
-			const { width, height, tabs, ctype } = decoded;
+			const {width, height, tabs, ctype} = decoded;
 			// If it's a palettized PNG, load the palette for the Colors box.
 			// Note: PLTE (palette) chunk must be present for palettized PNGs,
 			// but can also be present as a recommended set of colors in true-color mode.
@@ -3474,7 +3475,7 @@ function read_image_file(blob, callback) {
 			}
 			file_format = "image/png";
 			const image_data = new ImageData(new Uint8ClampedArray(rgba), width, height);
-			callback(null, { file_format, monochrome, palette, image_data, source_blob: blob });
+			callback(null, {file_format, monochrome, palette, image_data, source_blob: blob});
 		} else if (detected_type_id === "tiff_be" || detected_type_id === "tiff_le") {
 			// IFDs = image file directories
 			// VSNs = ???
@@ -3489,7 +3490,7 @@ function read_image_file(blob, callback) {
 				var img = vsns[i];
 				if (img["t258"] == null || img["t258"].length < 3) continue;
 				var ar = img["t256"] * img["t257"];
-				if (ar > ma) { ma = ar; page = img; }
+				if (ar > ma) {ma = ar; page = img;}
 			}
 			UTIF.decodeImage(arrayBuffer, page, ifds);
 			var rgba = UTIF.toRGBA8(page);
@@ -3497,7 +3498,7 @@ function read_image_file(blob, callback) {
 			var image_data = new ImageData(new Uint8ClampedArray(rgba.buffer), page.width, page.height);
 
 			file_format = "image/tiff";
-			callback(null, { file_format, monochrome, palette, image_data, source_blob: blob });
+			callback(null, {file_format, monochrome, palette, image_data, source_blob: blob});
 		} else if (detected_type_id === "pdf") {
 			file_format = "application/pdf";
 
@@ -3523,7 +3524,7 @@ function read_image_file(blob, callback) {
 					console.log('Page loaded');
 
 					var scale = 1.5;
-					var viewport = page.getViewport({ scale });
+					var viewport = page.getViewport({scale});
 
 					// Prepare canvas using PDF page dimensions
 					var canvas = make_canvas(viewport.width, viewport.height);
@@ -3537,7 +3538,7 @@ function read_image_file(blob, callback) {
 					renderTask.promise.then(() => {
 						console.log('Page rendered');
 						const image_data = canvas.ctx.getImageData(0, 0, canvas.width, canvas.height);
-						callback(null, { file_format, monochrome, palette, image_data, source_blob: blob });
+						callback(null, {file_format, monochrome, palette, image_data, source_blob: blob});
 					});
 				});
 			}, (reason) => {
@@ -3579,7 +3580,7 @@ function read_image_file(blob, callback) {
 					handle_decode_fail();
 					return;
 				}
-				callback(null, { file_format, monochrome, palette, image: img, source_blob: blob });
+				callback(null, {file_format, monochrome, palette, image: img, source_blob: blob});
 			};
 			img.onerror = handle_decode_fail;
 			img.src = blob_uri;
@@ -3596,7 +3597,7 @@ function update_from_saved_file(blob) {
 			return;
 		}
 		apply_file_format_and_palette_info(info);
-		const format = image_formats.find(({ mimeType }) => mimeType === info.file_format);
+		const format = image_formats.find(({mimeType}) => mimeType === info.file_format);
 		undoable({
 			name: `${localize("Save As")} ${format ? format.name : info.file_format}`,
 			icon: get_help_folder_icon("p_save.png"),
@@ -3679,7 +3680,7 @@ function show_multi_user_setup_dialog(from_current_document) {
 		</p>
 	`);
 	const $session_name = $w.$main.find("#session-name");
-	$w.$main.css({ maxWidth: "500px" });
+	$w.$main.css({maxWidth: "500px"});
 	$w.$Button("Start", () => {
 		let name = $session_name.val().trim();
 

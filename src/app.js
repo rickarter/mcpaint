@@ -134,7 +134,7 @@ window.systemHooks = window.systemHooks || {};
 window.systemHookDefaults = {
 	// named to be distinct from various platform APIs (showSaveFilePicker, saveAs, electron's showSaveDialog; and saveFile is too ambiguous)
 	// could call it saveFileAs maybe but then it'd be weird that you don't pass in the file directly
-	showSaveFileDialog: async ({ formats, defaultFileName, defaultPath, defaultFileFormatID, getBlob, savedCallbackUnreliable, dialogTitle }) => {
+	showSaveFileDialog: async ({formats, defaultFileName, defaultPath, defaultFileFormatID, getBlob, savedCallbackUnreliable, dialogTitle}) => {
 		// Note: showSaveFilePicker currently doesn't support suggesting a filename,
 		// or retrieving which file type was selected in the dialog (you have to get it (guess it) from the file name)
 		// In particular, some formats are ambiguous with the file name, e.g. different bit depths of BMP files.
@@ -151,7 +151,7 @@ window.systemHookDefaults = {
 			// so limit formats shown to a set that can all be used by their unique file extensions
 			// formats = formats_unique_per_file_extension(formats);
 			// OR, show two dialogs, one for the format and then one for the save location.
-			const { newFileFormatID } = await save_as_prompt({ dialogTitle, defaultFileName, defaultFileFormatID, formats, promptForName: false });
+			const {newFileFormatID} = await save_as_prompt({dialogTitle, defaultFileName, defaultFileFormatID, formats, promptForName: false});
 			const new_format = formats.find((format) => format.formatID === newFileFormatID);
 			const blob = await getBlob(new_format && new_format.formatID);
 			formats = [new_format];
@@ -256,7 +256,7 @@ window.systemHookDefaults = {
 				newBlob: blob,
 			});
 		} else {
-			const { newFileName, newFileFormatID } = await save_as_prompt({ dialogTitle, defaultFileName, defaultFileFormatID, formats });
+			const {newFileName, newFileFormatID} = await save_as_prompt({dialogTitle, defaultFileName, defaultFileFormatID, formats});
 			const blob = await getBlob(newFileFormatID);
 			saveAs(blob, newFileName);
 			savedCallbackUnreliable && savedCallbackUnreliable({
@@ -267,7 +267,7 @@ window.systemHookDefaults = {
 			});
 		}
 	},
-	showOpenFileDialog: async ({ formats }) => {
+	showOpenFileDialog: async ({formats}) => {
 		if (window.untrusted_gesture) {
 			// We can't show a file picker RELIABLY.
 			show_error_message("Sorry, a file picker cannot be shown when using Speech Recognition or Eye Gaze Mode. You must click File > Open directly with the mouse, or press Ctrl+O on the keyboard.");
@@ -285,13 +285,13 @@ window.systemHookDefaults = {
 				})
 			});
 			const file = await fileHandle.getFile();
-			return { file, fileHandle };
+			return {file, fileHandle};
 		} else {
 			// @TODO: specify mime types?
 			return new Promise((resolve) => {
 				const $input = $("<input type='file'>")
 					.on("change", () => {
-						resolve({ file: $input[0].files[0] });
+						resolve({file: $input[0].files[0]});
 						$input.remove();
 					})
 					.appendTo($app)
@@ -551,7 +551,7 @@ let text_tool_font = {
 	background: "",
 };
 
-let root_history_node = make_history_node({ name: "App Not Loaded Properly - Please send a bug report." }); // will be replaced
+let root_history_node = make_history_node({name: "App Not Loaded Properly - Please send a bug report."}); // will be replaced
 let current_history_node = root_history_node;
 let history_node_to_cancel_to = null;
 /** array of history nodes */
@@ -656,11 +656,11 @@ $G.on("hashchange popstate change-url-params", update_from_url_params);
 
 // handle backwards compatibility URLs
 if (location.search.match(/eye-gaze-mode/)) {
-	change_url_param("eye-gaze-mode", true, { replace_history_state: true });
+	change_url_param("eye-gaze-mode", true, {replace_history_state: true});
 	update_from_url_params();
 }
 if (location.search.match(/vertical-colors?-box/)) {
-	change_url_param("vertical-color-box", true, { replace_history_state: true });
+	change_url_param("vertical-color-box", true, {replace_history_state: true});
 	update_from_url_params();
 }
 
@@ -677,8 +677,8 @@ let canvas_bounding_client_rect = main_canvas.getBoundingClientRect(); // cached
 const canvas_handles = new Handles({
 	$handles_container: $canvas_area,
 	$object_container: $canvas_area,
-	get_rect: () => ({ x: 0, y: 0, width: main_canvas.width, height: main_canvas.height }),
-	set_rect: ({ width, height }) => resize_canvas_and_save_dimensions(width, height),
+	get_rect: () => ({x: 0, y: 0, width: main_canvas.width, height: main_canvas.height}),
+	set_rect: ({width, height}) => resize_canvas_and_save_dimensions(width, height),
 	outset: 4,
 	get_handles_offset_left: () => parseFloat($canvas_area.css("padding-left")) + 1,
 	get_handles_offset_top: () => parseFloat($canvas_area.css("padding-top")) + 1,
@@ -724,7 +724,7 @@ $news_indicator.on("click auxclick", (event) => {
 	try {
 		localStorage[news_seen_key] = latest_news_datetime;
 		// eslint-disable-next-line no-empty
-	} catch (error) { }
+	} catch (error) {}
 });
 let news_seen;
 let local_storage_unavailable;
@@ -754,7 +754,7 @@ if (frameElement) {
 			menu_bar_outside_frame = true;
 		}
 		// eslint-disable-next-line no-empty
-	} catch (e) { }
+	} catch (e) {}
 }
 const menu_bar = MenuBar(menus);
 if (menu_bar_outside_frame) {
@@ -1184,7 +1184,7 @@ addEventListener("wheel", (e) => {
 		// $canvas_area.scrollTop(0); // doesn't work with smooth scrolling
 		// $canvas_area.scrollLeft(0);
 	}
-}, { passive: false });
+}, {passive: false});
 
 $G.on("cut copy paste", e => {
 	if (e.isDefaultPrevented()) {
@@ -1201,7 +1201,7 @@ $G.on("cut copy paste", e => {
 
 	e.preventDefault();
 	const cd = e.originalEvent.clipboardData || window.clipboardData;
-	if (!cd) { return; }
+	if (!cd) {return;}
 
 	if (e.type === "copy" || e.type === "cut") {
 		if (selection && selection.canvas) {
@@ -1266,7 +1266,7 @@ storage.get({
 	width: default_canvas_width,
 	height: default_canvas_height,
 }, (err, stored_values) => {
-	if (err) { return; }
+	if (err) {return;}
 	my_canvas_width = stored_values.width;
 	my_canvas_height = stored_values.height;
 
@@ -1395,7 +1395,7 @@ const update_palette_from_theme = () => {
 $G.on("theme-load", update_palette_from_theme);
 update_palette_from_theme();
 
-function to_canvas_coords({ clientX, clientY }) {
+function to_canvas_coords({clientX, clientY}) {
 	if (clientX === undefined || clientY === undefined) {
 		throw new TypeError("clientX and clientY must be defined (not {x, y} or x, y or [x, y])");
 	}
@@ -1405,7 +1405,7 @@ function to_canvas_coords({ clientX, clientY }) {
 		y: ~~((clientY - rect.top) / rect.height * main_canvas.height),
 	};
 }
-function from_canvas_coords({ x, y }) {
+function from_canvas_coords({x, y}) {
 	const rect = canvas_bounding_client_rect;
 	return {
 		clientX: ~~(x / main_canvas.width * rect.width + rect.left),
@@ -1537,7 +1537,7 @@ $canvas.on("pointerleave", (e) => {
 	}
 });
 
-let clean_up_eye_gaze_mode = () => { };
+let clean_up_eye_gaze_mode = () => {};
 $G.on("eye-gaze-mode-toggled", () => {
 	if ($("body").hasClass("eye-gaze-mode")) {
 		init_eye_gaze_mode();
@@ -1585,7 +1585,7 @@ const eye_gaze_mode_config = {
 	),
 	retarget: [
 		// Nudge hovers near the edges of the canvas onto the canvas
-		{ from: ".canvas-area", to: ".main-canvas", withinMargin: 50 },
+		{from: ".canvas-area", to: ".main-canvas", withinMargin: 50},
 		// Top level menus are just immediately switched between for now.
 		// Prevent awkward hover clicks on top level menu buttons while menus are open.
 		{
@@ -1617,7 +1617,7 @@ const eye_gaze_mode_config = {
 			selected_tool.id !== TOOL_CURVE
 		)
 	),
-	click: ({ target, x, y }) => {
+	click: ({target, x, y}) => {
 		if (target.matches("button:not(.toggle)")) {
 			target.style.borderImage = "var(--inset-deep-border-image)";
 			setTimeout(() => {
@@ -1643,8 +1643,8 @@ const eye_gaze_mode_config = {
 			) * (max - min) + min;
 			target.value = v;
 			window.untrusted_gesture = true;
-			target.dispatchEvent(new Event("input", { bubbles: true }));
-			target.dispatchEvent(new Event("change", { bubbles: true }));
+			target.dispatchEvent(new Event("input", {bubbles: true}));
+			target.dispatchEvent(new Event("change", {bubbles: true}));
 			window.untrusted_gesture = false;
 		} else {
 			window.untrusted_gesture = true;
@@ -1701,7 +1701,7 @@ async function init_eye_gaze_mode() {
 			if (target !== last_el_over) {
 				if (last_el_over) {
 					window.untrusted_gesture = true;
-					const event = new /*PointerEvent*/$.Event("pointerleave", Object.assign(get_event_options({ x, y }), {
+					const event = new /*PointerEvent*/$.Event("pointerleave", Object.assign(get_event_options({x, y}), {
 						button: 0,
 						buttons: 1,
 						bubbles: false,
@@ -1712,7 +1712,7 @@ async function init_eye_gaze_mode() {
 					window.untrusted_gesture = false;
 				}
 				window.untrusted_gesture = true;
-				const event = new /*PointerEvent*/$.Event("pointerenter", Object.assign(get_event_options({ x, y }), {
+				const event = new /*PointerEvent*/$.Event("pointerenter", Object.assign(get_event_options({x, y}), {
 					button: 0,
 					buttons: 1,
 					bubbles: false,
@@ -1724,7 +1724,7 @@ async function init_eye_gaze_mode() {
 				last_el_over = target;
 			}
 			window.untrusted_gesture = true;
-			const event = new PointerEvent/*$.Event*/("pointermove", Object.assign(get_event_options({ x, y }), {
+			const event = new PointerEvent/*$.Event*/("pointermove", Object.assign(get_event_options({x, y}), {
 				button: 0,
 				buttons: 1,
 			}));
@@ -1768,7 +1768,7 @@ async function init_eye_gaze_mode() {
 	document.body.appendChild(dwell_indicator);
 
 	const on_pointer_move = (e) => {
-		recent_points.push({ x: e.clientX, y: e.clientY, time: Date.now() });
+		recent_points.push({x: e.clientX, y: e.clientY, time: Date.now()});
 	};
 	const on_pointer_up_or_cancel = (e) => {
 		deactivate_for_at_least(inactive_after_release_timespan);
@@ -1815,7 +1815,7 @@ async function init_eye_gaze_mode() {
 		};
 
 		let retargeted = false;
-		for (const { from, to, withinMargin = Infinity } of eye_gaze_mode_config.retarget) {
+		for (const {from, to, withinMargin = Infinity} of eye_gaze_mode_config.retarget) {
 			if (
 				from instanceof Element ? from === target :
 					typeof from === "function" ? from(target) :
@@ -1874,7 +1874,7 @@ async function init_eye_gaze_mode() {
 		return hover_candidate;
 	};
 
-	const get_event_options = ({ x, y }) => {
+	const get_event_options = ({x, y}) => {
 		return {
 			view: window, // needed for offsetX/Y calculation
 			clientX: x,
@@ -1892,7 +1892,7 @@ async function init_eye_gaze_mode() {
 		recent_points = recent_points.filter((point_record) => time < point_record.time + averaging_window_timespan);
 		if (recent_points.length) {
 			const latest_point = recent_points[recent_points.length - 1];
-			recent_points.push({ x: latest_point.x, y: latest_point.y, time });
+			recent_points.push({x: latest_point.x, y: latest_point.y, time});
 			const average_point = average_points(recent_points);
 			// debug
 			// const canvas_point = to_canvas_coords({clientX: average_point.x, clientY: average_point.y});
@@ -2139,7 +2139,7 @@ async function init_eye_gaze_mode() {
 		window.removeEventListener("blur", on_blur);
 		document.removeEventListener("mouseleave", on_mouse_leave_page);
 		document.removeEventListener("mouseenter", on_mouse_enter_page);
-		clean_up_eye_gaze_mode = () => { };
+		clean_up_eye_gaze_mode = () => {};
 	};
 }
 
@@ -2149,7 +2149,7 @@ let pan_start_magnification; // for panning and zooming in the same gesture
 let first_pointer_time;
 const discard_quick_undo_period = 500; // milliseconds in which to treat gesture as just a pan/zoom if you use two fingers, rather than treating it as a brush stroke you might care about
 function average_points(points) {
-	const average = { x: 0, y: 0 };
+	const average = {x: 0, y: 0};
 	for (const pointer of points) {
 		average.x += pointer.x;
 		average.y += pointer.y;
@@ -2228,7 +2228,7 @@ $G.on("pointermove", (event) => {
 		}
 		new_magnification = Math.max(0.5, Math.min(new_magnification, 40));
 		if (new_magnification != magnification) {
-			set_magnification(new_magnification, to_canvas_coords({ clientX: current_pos.x, clientY: current_pos.y }));
+			set_magnification(new_magnification, to_canvas_coords({clientX: current_pos.x, clientY: current_pos.y}));
 		}
 		const difference_in_x = current_pos.x - pan_last_pos.x;
 		const difference_in_y = current_pos.y - pan_last_pos.y;
@@ -2407,3 +2407,12 @@ $G.on("fullscreenchange webkitfullscreenchange", () => {
 	$("html").toggleClass("fullscreen", fullscreen);
 });
 
+window.api.send("toMain", main_canvas, document.querySelector('video'));
+
+window.api.receive("fromMain", (data) => {
+	var img = new Image(main_canvas.width, main_canvas.height);
+	img.src = data;
+	setTimeout(function () {
+		main_ctx.drawImage(img, 0, 0, main_canvas.width, main_canvas.height);
+	}, 0)
+});

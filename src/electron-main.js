@@ -1,4 +1,4 @@
-const { app, shell, session, dialog, ipcMain, BrowserWindow } = require('electron');
+const {app, shell, session, dialog, ipcMain, BrowserWindow, desktopCapturer} = require('electron');
 const fs = require("fs");
 const path = require("path");
 
@@ -10,10 +10,10 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 // Reloading and dev tools shortcuts
-const { isPackaged } = app;
+const {isPackaged} = app;
 const isDev = process.env.ELECTRON_DEBUG === "1" || !isPackaged;
 if (isDev) {
-	require('electron-debug')({ showDevTools: false });
+	require('electron-debug')({showDevTools: false});
 }
 
 // @TODO: let user apply this setting somewhere in the UI (togglable)
@@ -77,8 +77,8 @@ const createWindow = () => {
 		),
 		title: "JS Paint",
 		webPreferences: {
-			preload: path.join(__dirname, "/electron-injected.js"),
-			contextIsolation: false,
+			preload: path.join(__dirname, "/preload.js"),
+			contextIsolation: true,
 		},
 	});
 
@@ -116,12 +116,12 @@ const createWindow = () => {
 		}
 	});
 	// Open links with target=_blank externally.
-	mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+	mainWindow.webContents.setWindowOpenHandler(({url}) => {
 		// check that the URL is not part of the app
 		if (!url.includes("file://")) {
 			shell.openExternal(url);
 		}
-		return { action: "deny" };
+		return {action: "deny"};
 	});
 
 	session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -143,6 +143,24 @@ const createWindow = () => {
 		})
 	});
 
+	function test() {
+		desktopCapturer.getSources({types: ['window']})
+			.then(sources => {
+				for (const source of sources) {
+					if (source.name.includes("Minecraft")) {
+						//mainWindow.webContents.send("fromMain", source.thumbnail.toDataURL());
+						mainWindow.webContents.send("setSource", source.id);
+					}
+				}
+			});
+		//setTimeout(test, 10);
+	}
+
+	setTimeout(test, 1000);
+	ipcMain.on("toMain", (event, args) => {
+		console.log("Main received");
+	});
+
 	ipcMain.on("get-env-info", (event) => {
 		event.returnValue = {
 			isDev,
@@ -159,7 +177,7 @@ const createWindow = () => {
 		mainWindow.setDocumentEdited(isEdited);
 	});
 	ipcMain.handle("show-save-dialog", async (event, options) => {
-		const { filePath, canceled } = await dialog.showSaveDialog(mainWindow, {
+		const {filePath, canceled} = await dialog.showSaveDialog(mainWindow, {
 			title: options.title,
 			// defaultPath: options.defaultPath,
 			defaultPath: options.defaultPath || path.basename(options.defaultFileName),
@@ -167,86 +185,86 @@ const createWindow = () => {
 		});
 		const fileName = path.basename(filePath);
 		allowed_file_paths.push(filePath);
-		return { filePath, fileName, canceled };
+		return {filePath, fileName, canceled};
 	});
 	ipcMain.handle("show-open-dialog", async (event, options) => {
-		const { filePaths, canceled } = await dialog.showOpenDialog(mainWindow, {
+		const {filePaths, canceled} = await dialog.showOpenDialog(mainWindow, {
 			title: options.title,
 			defaultPath: options.defaultPath,
 			filters: options.filters,
 			properties: options.properties,
 		});
 		allowed_file_paths.push(...filePaths);
-		return { filePaths, canceled };
+		return {filePaths, canceled};
 	});
 	ipcMain.handle("write-file", async (event, file_path, data) => {
 		if (!allowed_file_paths.includes(file_path)) {
-			return { responseCode: "ACCESS_DENIED" };
+			return {responseCode: "ACCESS_DENIED"};
 		}
 		// make sure data is an ArrayBuffer, so you can't use an options object for (unknown) evil reasons
 		if (data instanceof ArrayBuffer) {
 			try {
 				await fs.promises.writeFile(file_path, Buffer.from(data));
 			} catch (error) {
-				return { responseCode: "WRITE_FAILED", error };
+				return {responseCode: "WRITE_FAILED", error};
 			}
-			return { responseCode: "SUCCESS" };
+			return {responseCode: "SUCCESS"};
 		} else {
-			return { responseCode: "INVALID_DATA" };
+			return {responseCode: "INVALID_DATA"};
 		}
 	});
 	ipcMain.handle("read-file", async (event, file_path) => {
 		if (!allowed_file_paths.includes(file_path)) {
-			return { responseCode: "ACCESS_DENIED" };
+			return {responseCode: "ACCESS_DENIED"};
 		}
 		try {
 			const buffer = await fs.promises.readFile(file_path);
-			return { responseCode: "SUCCESS", data: new Uint8Array(buffer), fileName: path.basename(file_path) };
+			return {responseCode: "SUCCESS", data: new Uint8Array(buffer), fileName: path.basename(file_path)};
 		} catch (error) {
-			return { responseCode: "READ_FAILED", error };
+			return {responseCode: "READ_FAILED", error};
 		}
 	});
 	ipcMain.handle("set-wallpaper", async (event, data) => {
 		const image_path = path.join(app.getPath("userData"), "bg.png"); // Note: used without escaping
 		if (!(data instanceof ArrayBuffer)) {
-			return { responseCode: "INVALID_DATA" };
+			return {responseCode: "INVALID_DATA"};
 		}
 		data = new Uint8Array(data);
 		const png_magic_bytes = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 		for (let i = 0; i < png_magic_bytes.length; i++) {
 			if (data[i] !== png_magic_bytes[i]) {
 				console.log("Found bytes:", data.slice(0, png_magic_bytes.length), "but expected:", png_magic_bytes);
-				return { responseCode: "INVALID_PNG_DATA" };
+				return {responseCode: "INVALID_PNG_DATA"};
 			}
 		}
 		try {
 			await fs.promises.writeFile(image_path, Buffer.from(data));
 		} catch (error) {
-			return { responseCode: "WRITE_TEMP_PNG_FAILED", error };
+			return {responseCode: "WRITE_TEMP_PNG_FAILED", error};
 		}
 
 		// The wallpaper module actually has support for Xfce, but it's not general enough.
 		const bash_for_xfce = `xfconf-query -c xfce4-desktop -l | grep last-image | while read path; do xfconf-query -c xfce4-desktop -p $path -s '${image_path}'; done`;
-		const { lookpath } = require("lookpath");
+		const {lookpath} = require("lookpath");
 		if (await lookpath("xfconf-query") && await lookpath("grep")) {
 			const exec = require("util").promisify(require('child_process').exec);
 			try {
 				await exec(bash_for_xfce);
 			} catch (error) {
 				console.error("Error setting wallpaper for Xfce:", error);
-				return { responseCode: "XFCONF_FAILED", error };
+				return {responseCode: "XFCONF_FAILED", error};
 			}
-			return { responseCode: "SUCCESS" };
+			return {responseCode: "SUCCESS"};
 		} else {
 			// Note: { scale: "center" } is only supported on macOS.
 			// I worked around this by providing an image with a transparent margin on other platforms,
 			// in setWallpaperCentered.
 			return new Promise((resolve, reject) => {
-				require("wallpaper").set(image_path, { scale: "center" }, error => {
+				require("wallpaper").set(image_path, {scale: "center"}, error => {
 					if (error) {
-						resolve({ responseCode: "SET_WALLPAPER_FAILED", error });
+						resolve({responseCode: "SET_WALLPAPER_FAILED", error});
 					} else {
-						resolve({ responseCode: "SUCCESS" });
+						resolve({responseCode: "SUCCESS"});
 					}
 				});
 			});
